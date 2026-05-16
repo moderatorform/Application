@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>আবেদন ফর্ম</title>
+    <title>মডারেটর আবেদন ফর্ম</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -374,6 +374,33 @@
     let uploadedImageUrl = null;
     let isImgUploading = false;
 
+    // 🌟🌟🌟 প্রথমেই পপআপ দেখানো - নির্দিষ্ট টেক্সট সহ (শুধুমাত্র পেজ লোডের সময় একবার) 🌟🌟🌟
+    window.addEventListener('load', function() {
+        Swal.fire({
+            title: 'মডারেটর আবেদন ফর্ম',
+            html: `
+                <div style="text-align:left; font-size:1rem; line-height:1.5;">
+                    <p>আমাদের ফেসবুক গ্রুপের মডারেটর প্যানেল গঠনের জন্য এই ফর্ম তৈরি করা হয়েছে।<br><br>
+                    যদি আপনি নতুন মডারেটর হতে আগ্রহী হন তাহলে তথ্য দিয়ে হালনাগাদ করুন, অনুগ্রহ করে সঠিক তথ্য ও ছবি সহ ফর্মটি পূরণ করবেন۔</p>
+                    <p style="margin-top:12px;"><strong>📌 সঠিক তথ্য ও ছবি আপলোড বাধ্যতামূলক।</strong> যাচাই-বাছাই শেষে উপযুক্ত প্রার্থীদের সঙ্গে যোগাযোগ করা হবে।</p>
+                    <p style="margin-top:12px; background:#fef3c7; padding:10px; border-radius:12px;">
+                        🧑‍⚖️ আসন সংখ্যা- <strong>১০ জন</strong><br>
+                        ⏳ আবেদন শেষঃ <strong>৩১/০৫/২০২৬ ইং</strong>
+                    </p>
+                </div>
+            `,
+            icon: 'info',
+            confirmButtonText: 'আবেদন শুরু করুন',
+            confirmButtonColor: '#1287a8',
+            backdrop: true,
+            allowOutsideClick: false,
+            allowEscapeKey: true,
+            customClass: {
+                popup: 'rounded-2xl shadow-2xl'
+            }
+        });
+    });
+
     // ---------- ছবি আপলোড (ImgBB) ----------
     photoInput.addEventListener('change', async function(e) {
         const file = e.target.files[0];
@@ -549,6 +576,7 @@
             // ফর্ম পুরোপুরি রিসেট
             formEl.reset();
             preview.style.display = 'none';
+            preview.src = '';
             uploadedImageUrl = null;
             uploadFeedback.innerHTML = '';
             // রেডিও ও চেকবক্স রিসেট: রেডিওতে 'নতুন আবেদনকারী' চেক করে রাখবো, 'না' অপশন আনচেক
