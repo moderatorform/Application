@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>আবেদন ফর্ম</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <!-- SweetAlert2 সুন্দর পপআপের জন্য -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .form-wrapper {
+            max-width: 980px;
+            margin: 0 auto;
+            background: #ffffff;
+            box-shadow: 0 35px 60px -25px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            transition: all 0.2s;
+            padding: 10px;
+        }
+
+        .banner-image {
+            width: 100%;
+            display: block;
+            object-fit: cover;
+            max-height: 210px;
+            background: #0a3f53;
+            padding: 2px;
+        }
+
+        .form-body {
+            padding: 32px 40px 48px;
+        }
+
+        .field-group {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e2edf4;
+            padding-bottom: 24px;
+        }
+
+        .field-label {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #145c74;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .q-badge {
+            background: #ffc107;
+            color: #1a3e4c;
+            padding: 4px 14px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .required-star {
+            color: #dc3545;
+            font-size: 1rem;
+            margin-left: 4px;
+        }
+
+        .optional-tag {
+            background: #e9f0f5;
+            font-size: 0.7rem;
+            padding: 3px 12px;
+            font-weight: normal;
+            color: #2f6b8f;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 22px;
+            font-size: 0.95rem;
+            border: 1.8px solid #cde1ea;
+            background: #ffffff;
+            transition: all 0.2s;
+            font-family: inherit;
+            outline: none;
+            border-radius: 10px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #1287a8;
+            box-shadow: 0 0 0 4px rgba(18, 135, 168, 0.15);
+        }
+
+        .options-grid {
+            background: #f8fcfd;
+            padding: 14px 26px;
+            border: 1px solid #d1e2ec;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 32px;
+            align-items: center;
+            border-radius: 10px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #145c74;
+        }
+
+        .option-item input {
+            width: 20px;
+            height: 20px;
+            accent-color: #1287a8;
+            margin: 0;
+        }
+
+        .upload-area {
+            background: #f4fafd;
+            border: 2px dashed #8fbbd0;
+            padding: 16px 24px;
+            transition: 0.2s;
+            
+        }
+
+        .preview-box {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .preview-img {
+            width: 88px;
+            height: 88px;
+            object-fit: cover;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.1);
+            display: none;
+            border: 3px solid #ffc107;
+        }
+
+        .upload-hint {
+            font-size: 0.72rem;
+            color: #377a9e;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .status-msg {
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 6px;
+        }
+
+        .submit-button {
+            background: linear-gradient(105deg, #116f8c, #084c63);
+            border: none;
+            color: white;
+            font-weight: 800;
+            font-size: 1.2rem;
+            padding: 18px 30px;
+            width: 100%;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 28px;
+            letter-spacing: 0.8px;
+            box-shadow: 0 12px 24px -12px rgba(8, 76, 99, 0.5);
+        }
+
+        .submit-button:hover {
+            background: linear-gradient(105deg, #0a5c77, #053e51);
+            transform: translateY(-2px);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.65;
+            transform: none;
+            cursor: wait;
+        }
+
+        .agreement-card {
+            background: #fff9ea;
+            padding: 20px 24px;
+            border-left: 6px solid #ffb82e;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .agreement-card p {
+            font-size: 0.92rem;
+            line-height: 1.55;
+            color: #2c5033;
+        }
+
+        .checkbox-label-custom {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-radius: 10px;
+            background: #ecf7fb;
+            padding: 12px 24px;
+            margin-top: 8px;
+            font-weight: 600;
+            color: #145c74;
+            cursor: pointer;
+        }
+
+        @media (max-width: 680px) {
+            .form-body {
+                padding: 22px 20px 35px;
+            }
+            .options-grid {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                border-radius: 10px;
+            }
+            .banner-image {
+                max-height: 140px;
+                object-fit: cover;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-wrapper">
+    <img class="banner-image" src="https://i.ibb.co.com/TxyMbwZ9/20260517-013537.jpg" alt="মডারেটর আবেদন ব্যানার">
+
+    <div class="form-body">
+        <form id="moderatorForm">
+            <!-- ১. অবস্থা (নতুন আবেদনকারী) -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">১</span> আপনার অবস্থা? <span class="required-star">*</span></div>
+                <div class="options-grid">
+                    <label class="option-item"><input type="radio" name="applicantStatus" value="নতুন আবেদনকারী" required checked> নতুন আবেদনকারী</label>
+                </div>
+            </div>
+
+            <!-- ২. গ্রুপ নির্বাচন -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">২</span> আপনি কোন গ্রুপের জন্য আবেদন করছেন? <span class="required-star">*</span></div>
+                <div class="options-grid" id="groupsWrapper">
+                    <label class="option-item"><input type="checkbox" name="groups" value="ব্যতিক্রম ফ্রি সাজেশন"> ব্যতিক্রম ফ্রি সাজেশন</label>
+                    <label class="option-item"><input type="checkbox" name="groups" value="জাতীয় বিশ্ববিদ্যালয় নোটিশ বোর্ড"> জাতীয় বিশ্ববিদ্যালয় নোটিশ বোর্ড</label>
+                </div>
+            </div>
+
+            <!-- ৩. অন্য কোথাও মডারেটর -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">৩</span>বর্তমানে অন্য কোনো ফেসবুক গ্রুপের মডারেটর/অ্যাডমিন হিসেবে দায়িত্বে আছেন?<span class="required-star">*</span></div>
+                <div class="options-grid">
+                    <label class="option-item"><input type="radio" name="otherModStatus" value="হ্যাঁ" required> হ্যাঁ</label>
+                    <label class="option-item"><input type="radio" name="otherModStatus" value="না"> না</label>
+                </div>
+            </div>
+
+            <!-- ৪. নাম -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">৪</span> আপনার নাম <span class="required-star">*</span></div>
+                <input type="text" name="fullname" placeholder="পূর্ণ নাম (বাংলা/ইংরেজি)" autocomplete="name" required>
+            </div>
+
+            <!-- ৫. ফেসবুক প্রোফাইল -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">৫</span> ফেসবুক প্রোফাইল লিংক <span class="required-star">*</span></div>
+                <input type="url" name="fbLink" placeholder="https://facebook.com/yourprofile" required>
+            </div>
+
+            <!-- ৬. পেশা/যোগ্যতা -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">৬</span> পেশা/শিক্ষাগত যোগ্যতা <span class="required-star">*</span></div>
+                <input type="text" name="profession" placeholder="যেমন: ছাত্র, শিক্ষক, চাকুরীজীবি, স্নাতক" required>
+            </div>
+
+            <!-- ৭. শিক্ষাপ্রতিষ্ঠান -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">৭</span> আপনার শিক্ষা প্রতিষ্ঠানের নাম <span class="required-star">*</span></div>
+                <input type="text" name="institution" placeholder="বিদ্যালয় / কলেজ / বিশ্ববিদ্যালয়ের নাম" required>
+            </div>
+
+            <!-- ৮. উপজেলা -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">৮</span> আপনার পুরো ঠিকানা লিখুন <span class="required-star">*</span></div>
+                <input type="text" name="upazila" placeholder="যেমন: গ্রাম, উপজেলা ও জেলার নাম।" required>
+            </div>
+
+            <!-- ৯. মোবাইল -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">৯</span> সচল মোবাইল নম্বর <span class="required-star">*</span></div>
+                <input type="tel" name="mobile" placeholder="01XXXXXXXXX" pattern="01[3-9]\d{8}" required>
+                <small class="upload-hint">বাংলাদেশী নম্বর (01 দিয়ে শুরু, 11 ডিজিট)</small>
+            </div>
+
+            <!-- ১০. কেন মডারেটর হতে চান -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">১০</span> কেন মডারেটর হতে চান? <span class="required-star">*</span></div>
+                <textarea name="reason" rows="3" placeholder="আপনার মডারেটর হওয়ার আগ্রহ, অভিজ্ঞতা ও ভূমিকা লিখুন..." required></textarea>
+            </div>
+
+            <!-- ১১. হোয়াটসঅ্যাপ (ঐচ্ছিক) -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">১১</span> হোয়াটসঅ্যাপ নম্বর <span class="optional-tag">ঐচ্ছিক</span></div>
+                <input type="tel" name="whatsapp" placeholder="ঐচ্ছিক, শুধু যোগাযোগের জন্য">
+            </div>
+
+            <!-- ১২. ছবি আপলোড (ImgBB) -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">১২</span> ছবি আপলোড করুন <span class="required-star">*</span></div>
+                <div class="upload-area">
+                    <input type="file" id="photoFile" accept="image/jpeg, image/png, image/jpg, image/webp" required>
+                    <div class="preview-box">
+                        <img id="imagePreview" class="preview-img" alt="প্রিভিউ">
+                        <span id="uploadFeedback" class="status-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ১৩. অঙ্গীকারপত্র + চেকবক্স (অত্যন্ত গুরুত্বপূর্ণ) -->
+            <div class="field-group">
+                <div class="field-label"><span class="q-badge">১৩</span> অঙ্গীকারপত্র <span class="required-star">*</span></div>
+                <div class="agreement-card">
+                    <p>📜 আমি অঙ্গীকার করছি যে, গ্রুপের সকল দায়িত্ব সততা, নিষ্ঠা ও দায়িত্বশীলতার সাথে পালন করবো। গ্রুপের সকল নিয়মনীতি মেনে চলবো এবং প্রশাসনিক সিদ্ধান্তকে সম্মান করবো। কোনো ধরনের ক্ষতিকর, বিভ্রান্তিকর বা অনৈতিক কার্যক্রমে জড়িত হবো না। সর্বদা গ্রুপের শৃঙ্খলা, নিরাপত্তা ও সুষ্ঠু পরিবেশ বজায় রাখতে সচেষ্ট থাকবো।</p>
+                </div>
+                <label class="checkbox-label-custom">
+                    <input type="checkbox" id="agreementCheckbox" required> হ্যাঁ, আমি উপরোক্ত শর্তাবলী ও অঙ্গীকারসমূহ সম্পূর্ণভাবে পড়ে বুঝেছি এবং সকল নিয়মনীতি মেনে চলতে সম্মত আছি।
+                </label>
+            </div>
+
+            <button type="submit" class="submit-button" id="submitBtn">আবেদন জমা দিন</button>
+        </form>
+        <p style="font-size: 0.7rem; text-align: center; margin-top: 28px; color:#79a1b9;">🔐 তথ্য গোপনীয়তা সংরক্ষিত ও নিরাপদ রাখা হবে।</p>
+    </div>
+</div>
+
+<script>
+    // ------------------------------
+    // 🔥 Firebase কনফিগারেশন (আপনার নিজের ডেটাবেস সেট করুন)
+    // ------------------------------
+    const firebaseConfig = {
+        apiKey: "AIzaSyAjf1ni687uUVkbxlF9tS4YyZ9bjR9Kc_Q",
+        authDomain: "group-moderator-documents.firebaseapp.com",
+        projectId: "group-moderator-documents",
+        storageBucket: "group-moderator-documents.firebasestorage.app",
+        messagingSenderId: "1081390808322",
+        appId: "1:1081390808322:web:c3822c7289e9f5c65c161b"
+    };
+
+    // ImgBB API Key (আপনার দেওয়া কী)
+    const IMGBB_API_KEY = "a5b3fb9ec65e94a6cd657d8dab7e8253";
+
+    // ফায়ারবেস আরম্ভ
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // DOM এলিমেন্টসমূহ
+    const photoInput = document.getElementById('photoFile');
+    const preview = document.getElementById('imagePreview');
+    const uploadFeedback = document.getElementById('uploadFeedback');
+    const submitBtn = document.getElementById('submitBtn');
+    const formEl = document.getElementById('moderatorForm');
+    const agreementCheckbox = document.getElementById('agreementCheckbox');
+
+    let uploadedImageUrl = null;
+    let isImgUploading = false;
+
+    // ---------- ছবি আপলোড (ImgBB) ----------
+    photoInput.addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // ফাইল সাইজ 5MB
+        if (file.size > 5 * 1024 * 1024) {
+            uploadFeedback.innerHTML = 'ছবি ৫ এমবি-র বেশি হতে পারবে না।';
+            uploadFeedback.style.color = '#c7254e';
+            photoInput.value = '';
+            preview.style.display = 'none';
+            uploadedImageUrl = null;
+            return;
+        }
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            uploadFeedback.innerHTML = ' শুধু JPEG, PNG বা WEBP ফরম্যাট সমর্থিত।';
+            uploadFeedback.style.color = '#c7254e';
+            photoInput.value = '';
+            preview.style.display = 'none';
+            uploadedImageUrl = null;
+            return;
+        }
+
+        // প্রিভিউ দেখানো
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            preview.src = ev.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+
+        uploadFeedback.innerHTML = '⏳ ছবি আপলোড হচ্ছে, একটু অপেক্ষা করুন...';
+        uploadFeedback.style.color = '#1287a8';
+        isImgUploading = true;
+        submitBtn.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('key', IMGBB_API_KEY);
+
+            const response = await fetch('https://api.imgbb.com/1/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                uploadedImageUrl = data.data.url;
+                uploadFeedback.innerHTML = `✅ ছবি আপলোড সফল!`;
+                uploadFeedback.style.color = '#1d7642';
+                submitBtn.disabled = false;
+            } else {
+                throw new Error(data.error?.message || 'আপলোড ব্যর্থ');
+            }
+        } catch (err) {
+            console.error(err);
+            uploadFeedback.innerHTML = ' আপলোড ব্যর্থ হয়েছে, আবার চেষ্টা করুন।';
+            uploadFeedback.style.color = '#c7254e';
+            uploadedImageUrl = null;
+            preview.style.display = 'none';
+            submitBtn.disabled = true;
+        } finally {
+            isImgUploading = false;
+        }
+    });
+
+    // ---------- ফর্ম জমা দেওয়ার মূল ফাংশন (Firestore + নাম ডকুমেন্ট আইডি) ----------
+    formEl.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        // অঙ্গীকার চেকবক্স যাচাই
+        if (!agreementCheckbox.checked) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'অঙ্গীকার গৃহীত হয়নি',
+                text: 'অনুগ্রহ করে অঙ্গীকারপত্রে সম্মতি দিন (চেকবক্সে টিক দিন)',
+                confirmButtonColor: '#f39c12',
+                background: '#fffef7'
+            });
+            return;
+        }
+
+        // গ্রুপ নির্বাচন চেক
+        const selectedGroups = document.querySelectorAll('input[name="groups"]:checked');
+        if (selectedGroups.length === 0) {
+            Swal.fire('প্রয়োজনীয়', 'অন্তত একটি গ্রুপ নির্বাচন করুন', 'error');
+            return;
+        }
+
+        // ছবি আপলোড চেক
+        if (!uploadedImageUrl) {
+            Swal.fire('ছবি প্রয়োজন', 'আপনার ছবি আপলোড করুন (JPEG/PNG)', 'error');
+            return;
+        }
+
+        // রেডিও & মৌলিক ফিল্ড ভ্যালিডেশন
+        const statusRadio = document.querySelector('input[name="applicantStatus"]:checked');
+        const otherModRadio = document.querySelector('input[name="otherModStatus"]:checked');
+        if (!statusRadio || !otherModRadio) {
+            Swal.fire('অসম্পূর্ণ তথ্য', 'অনুগ্রহ করে ১নং ও ৩নং প্রশ্নের উত্তর দিন।', 'error');
+            return;
+        }
+
+        const mobileInput = formEl.querySelector('input[name="mobile"]');
+        const mobileRegex = /^01[3-9]\d{8}$/;
+        if (!mobileRegex.test(mobileInput.value.trim())) {
+            Swal.fire('ভুল মোবাইল নম্বর', 'সঠিক বাংলাদেশী মোবাইল নম্বর দিন (01XXXXXXXXX) 11 ডিজিট', 'error');
+            return;
+        }
+
+        const requiredFields = ['fullname', 'fbLink', 'profession', 'institution', 'upazila', 'reason'];
+        for (let field of requiredFields) {
+            const val = formEl.querySelector(`[name="${field}"]`).value.trim();
+            if (!val) {
+                Swal.fire('ঘর খালি', `"${field}" ঘরটি পূরণ করা আবশ্যক`, 'error');
+                return;
+            }
+        }
+
+        // আবেদনকারীর নাম নেওয়া (ডকুমেন্ট আইডি তৈরির জন্য)
+        const fullNameRaw = formEl.querySelector('input[name="fullname"]').value.trim();
+        // নিরাপদ ও অনন্য document id তৈরির জন্য timestamp + নাম (স্পেস replace)
+        const timestampShort = Date.now();
+        const safeName = fullNameRaw.replace(/[^a-zA-Z0-9\u0980-\u09FF]/g, '_').substring(0, 40);
+        const customDocId = `${safeName}_${timestampShort}`;   // যেমন: রিয়াজুল_1734567890123
+
+        // গ্রুপ অ্যারে
+        const groupsArray = Array.from(selectedGroups).map(cb => cb.value);
+
+        // ফায়ারস্টোর ডেটা প্রস্তুত
+        const applicationData = {
+            timestamp: new Date().toISOString(),
+            applicantStatus: statusRadio.value,
+            groups: groupsArray,
+            otherModStatus: otherModRadio.value,
+            fullName: fullNameRaw,
+            fbProfileLink: formEl.querySelector('input[name="fbLink"]').value.trim(),
+            profession: formEl.querySelector('input[name="profession"]').value.trim(),
+            institution: formEl.querySelector('input[name="institution"]').value.trim(),
+            upazila: formEl.querySelector('input[name="upazila"]').value.trim(),
+            mobile: mobileInput.value.trim(),
+            reason: formEl.querySelector('textarea[name="reason"]').value.trim(),
+            whatsapp: formEl.querySelector('input[name="whatsapp"]').value.trim() || 'প্রদান করেনি',
+            photoUrl: uploadedImageUrl,
+            agreementAccepted: true,
+            agreementFulltext: "শর্তাবলী ও অঙ্গীকারে সম্পূর্ণ সম্মত"
+        };
+
+        // জমা দেওয়ার আগে বাটন নিষ্ক্রিয়
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span style="display:inline-block; width:18px; height:18px; border:2px solid white; border-top:2px solid #ffc107; animation:spin 0.8s linear infinite; margin-right:8px;"></span> জমা দেওয়া হচ্ছে...';
+
+        try {
+            // 🔥 মূল অংশ: Firestore এ ডকুমেন্ট যোগ করা, যেখানে ডকুমেন্ট আইডি হবে নাম + টাইমস্ট্যাম্প
+            // => প্রত্যেক আবেদনকারীর নামভিত্তিক ইউনিক ডকুমেন্ট সংরক্ষিত হবে
+            await db.collection('moderator_applications').doc(customDocId).set(applicationData);
+            
+            // সাফল্যের পপআপ (সুন্দর Swal) -> সাবমিট সফল
+            await Swal.fire({
+                icon: 'success',
+                title: '🎉 আবেদন জমা হয়েছে!',
+                html: `<strong>অভিনন্দন ${fullNameRaw}</strong>, আপনার আবেদন সফলভাবে গৃহীত হয়েছে।<br>আমরা শীঘ্রই যোগাযোগ করব।<br> ধন্যবাদ।`,
+                confirmButtonText: 'ঠিক আছে',
+                confirmButtonColor: '#176d8f',
+                background: '#ffffff',
+                backdrop: true,
+                timer: 5000,
+                timerProgressBar: true
+            });
+            
+            // ফর্ম পুরোপুরি রিসেট
+            formEl.reset();
+            preview.style.display = 'none';
+            uploadedImageUrl = null;
+            uploadFeedback.innerHTML = '';
+            // রেডিও ও চেকবক্স রিসেট: রেডিওতে 'নতুন আবেদনকারী' চেক করে রাখবো, 'না' অপশন আনচেক
+            document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            // ডিফল্ট কিছু সেট
+            const defaultStatus = document.querySelector('input[name="applicantStatus"][value="নতুন আবেদনকারী"]');
+            if (defaultStatus) defaultStatus.checked = true;
+            agreementCheckbox.checked = false;
+            // গ্রুপ চেকবক্স ফাঁকা
+            // ফেসবুক লিংক ইত্যাদি রিসেট হয়ে গেছে
+        } catch (firebaseError) {
+            console.error('🔥 Firestore Error:', firebaseError);
+            Swal.fire({
+                icon: 'error',
+                title: 'জমা দিতে ব্যর্থ!',
+                text: 'ইন্টারনেট সংযোগ চেক করুন অথবা কিছুক্ষণ পর আবার চেষ্টা করুন।',
+                confirmButtonColor: '#d33'
+            });
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'আবেদন জমা দিন';
+        }
+    });
+
+    // spin অ্যানিমেশন স্টাইলে যোগ করা (যেহেতু ক্লাসে spin নেই, কিন্তু ইনলাইনে দিয়েছি)
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
+    document.head.appendChild(styleSheet);
+</script>
+</body>
+</html>
